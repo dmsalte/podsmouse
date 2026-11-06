@@ -62,4 +62,9 @@ ssh -L 8737:127.0.0.1:8737 <user>@<pi-address>
 
 then open http://127.0.0.1:8737 on the PC. Calibration also runs from there.
 
-Upstream comments and log messages are mostly in French.
+## Language
+
+Upstream comments, log messages and UI text are in French. `podsmouse/english.py` translates what the user sees
+(log lines, the `--diag` status line, notifications, the calibration window) at runtime when started through
+`podsmouse.main` (default `--lang en`). The web UI is still French (T13). Running `upstream/airpods_mouse_controller.py`
+directly gives the original French output.

@@ -3,6 +3,18 @@
 Newest entry first. Every agent appends an entry before it stops working.
 Format: date, agent, what was done, what is left, notes for the next agent.
 
+## 2026-11-06 – claude (T12, branch claude/english)
+- Hardware result from the maintainer (not yet in captures/): the stream works on Linux (Ubuntu, Intel AX201)
+  with AirPods **Pro 2 (USB-C)**, product ID `0x2024`, at roughly 96 Hz with upstream defaults. The maintainer
+  also plans to use Pro 3; Pro 3 (`0x2027`) is still untested. Raw diag log and btsnoop exist on the maintainer's
+  machine and should be committed (T01/T02).
+- `podsmouse/english.py`: runtime English for upstream log lines, the `--diag` line, notifications and the
+  calibration window. No upstream edits. `tests/test_english.py` fails if upstream adds an untranslated log message.
+- `podsmouse.main`: new `--sink uinput` (moves the local Linux pointer, for desktop testing), `--calibrate`
+  (creates the config file first; upstream's calibrate() fails if it is missing) and `--lang en|fr`.
+- Tested in simulation only (112 tests) plus a smoke run of `--diag` without Bluetooth (English output confirmed).
+- Next: T13 (English web UI), T01/T02 captures for Pro 2 (USB-C), Pro 3 when available.
+
 ## 2026-11-06 – claude (T08, branch claude/main-cli)
 - Added `podsmouse/pointer.py` (`SinkPointer`: upstream Pointer interface over a Sink; keeps fractional
   remainders for move and scroll; `move_abs` is a no-op with a one-time warning) and `podsmouse/main.py`.

@@ -63,6 +63,11 @@ AAPClient → MotionEngine → Controller → Sink
 - Dry run: `python -m podsmouse.main --sink null`
 - Run on the Pi: `python -m podsmouse.main --sink hid --config PATH` (also `--hid-device`, `--web-port`, `--no-web`, `-v`).
   These flags are a shared interface: `systemd/podsmouse.service` depends on `--sink` and `--config`.
+- Desktop testing on a Linux PC: `python -m podsmouse.main --calibrate`, then `python -m podsmouse.main --sink uinput`
+  (needs `python3-tk` and `python3-evdev`).
+- Output language: upstream prints French; `podsmouse/english.py` translates terminal output, notifications and the
+  calibration window at runtime (default `--lang en`). When upstream adds a log message, `tests/test_english.py`
+  fails until the message is added to `english.LOG_TEMPLATES`. Never translate by editing `upstream/`.
 - Gadget setup: `sudo gadget/setup-hid-gadget.sh` (idempotent; tears down and rebuilds)
 
 ## Working together (multiple agents)

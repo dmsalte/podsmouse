@@ -13,12 +13,14 @@ calling it. Nothing under upstream/ is modified.
 """
 
 import argparse
+import contextlib
 import logging
 import os
 import pathlib
 import sys
 import time
 
+from . import english
 from .pointer import SinkPointer
 from .sinks import HidSink, Sink
 
@@ -77,6 +79,23 @@ class DryRunSink(Sink):
         pass
 
 
+def calibrate(up, cfg, config_path: pathlib.Path, english_ui: bool = True) -> int:
+    """Run upstream's calibration window; the profile is saved into config_path."""
+    try:
+        import tkinter  # noqa: PLC0415
+    except ImportError:
+        log.error("--calibrate needs tkinter and a desktop session: sudo apt install python3-tk")
+        return 1
+    # Upstream's calibrate() reads the config file back before saving the profile, and fails
+    # if it does not exist yet.
+    if not config_path.exists():
+        config_path.write_text("{}\n")
+    ui = english.english_tk(tkinter) if english_ui else contextlib.nullcontext()
+    with ui:
+        up.calibrate(cfg, str(config_path))
+    return 0
+
+
 def build_sink(kind: str, hid_device: str) -> Sink:
     if kind == "hid":
         return HidSink(hid_device)
@@ -87,8 +106,13 @@ def build_sink(kind: str, hid_device: str) -> Sink:
 
 def parse_args(argv=None) -> argparse.Namespace:
     ap = argparse.ArgumentParser(prog="python -m podsmouse.main", description="AirPods head tracking as a USB HID mouse.")
-    ap.add_argument("--sink", choices=("hid", "null"), default="hid",
-                    help="mouse output: hid = USB gadget (default), null = dry run that only logs")
+    ap.add_argument("--sink", choices=("hid", "null", "uinput"), default="hid",
+                    help="mouse output: hid = USB gadget (default), null = dry run that only logs, "
+                         "uinput = move this Linux machine's own pointer (needs python3-evdev; for desktop testing)")
+    ap.add_argument("--calibrate", action="store_true",
+                    help="open the calibration window (needs a desktop and python3-tk), save the profile and exit")
+    ap.add_argument("--lang", choices=("en", "fr"), default="en",
+                    help="language of upstream messages and the calibration window (default en)")
     ap.add_argument("--hid-device", default=DEFAULT_HID_DEVICE, help=f"HID gadget device (default {DEFAULT_HID_DEVICE})")
     ap.add_argument("-c", "--config", default=str(DEFAULT_CONFIG),
                     help=f"writable config and calibration file (default {DEFAULT_CONFIG})")
@@ -105,10 +129,15 @@ def main(argv=None, upstream=None) -> int:
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO,
                         format="%(asctime)s %(levelname)s %(name)s: %(message)s", datefmt="%H:%M:%S")
     up = upstream or load_upstream()
+    if args.lang == "en":
+        english.install(up)
 
     config_path = pathlib.Path(args.config)
     config_path.parent.mkdir(parents=True, exist_ok=True)
     cfg = up.load_config(str(config_path))
+
+    if args.calibrate:
+        return calibrate(up, cfg, config_path, english_ui=args.lang == "en")
     if cfg.get("mode") == "pointeur" and not args.diag:
         log.warning("Config mode 'pointeur' needs absolute positioning, which USB HID relative mouse "
                     "cannot do. Set \"mode\": \"souris\" in %s.", config_path)
@@ -118,6 +147,18 @@ def main(argv=None, upstream=None) -> int:
     if args.diag:
         # Upstream uses its own NullPointer in diag mode; do not open the HID device.
         up.run(cfg, str(config_path), diag=True, web_port=web_port)
+        return 0
+
+    if args.sink == "uinput":
+        # Upstream's own Pointer writes to /dev/uinput, as in plain mousepods. For testing on a
+        # Linux desktop before the USB gadget hardware is available.
+        try:
+            import evdev  # noqa: F401, PLC0415
+        except ImportError:
+            log.error("--sink uinput needs python-evdev: sudo apt install python3-evdev")
+            return 1
+        log.info("Output: this machine's pointer via /dev/uinput")
+        up.run(cfg, str(config_path), diag=False, web_port=web_port)
         return 0
 
     try:

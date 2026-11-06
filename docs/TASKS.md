@@ -19,5 +19,5 @@ Status values: `todo`, `in progress`, `review`, `done`, `blocked`.
 | T09 | 3 | Pro 3 parser in `podsmouse/models/pro3.py`, if T02 shows it differs from Pro 2 | no | | blocked (T02) | |
 | T10 | 4 | systemd units for gadget and service, autostart on boot | no | claude | done | #5 |
 | T11 | 4 | Calibration, recenter and click methods tuned on hardware | yes | | todo | |
-| T12 | 4 | English for terminal output and calibration window (runtime translation, no upstream edits); `--sink uinput` and `--calibrate` in `podsmouse.main` | no | claude | in progress | claude/english |
+| T12 | 4 | English for terminal output and calibration window (runtime translation, no upstream edits); `--sink uinput` and `--calibrate` in `podsmouse.main` | no | claude | review | claude/english |
 | T13 | 4 | English web UI (translated copy or upstream contribution) | no | | todo | |
