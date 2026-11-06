@@ -29,7 +29,19 @@ AAPClient → MotionEngine → Controller → Sink
 - `Sink` interface (`podsmouse/sinks/base.py`): `move(dx, dy)`, `button(btn, down)`, `scroll(n)`.
 - `HidSink` writes 4-byte reports `[buttons, dx, dy, wheel]` (signed int8, clamp ±127, split larger moves)
   to `/dev/hidg0`. Report descriptor is in `gadget/hid-mouse.desc` and must match.
+- HID byte 0 is bits 0/1/2 = left/right/middle plus five zero padding bits;
+  bytes 1/2/3 are signed relative X/Y/wheel (-127..127), with no report ID.
+  Y positive is down; wheel positive is up. The four-byte layout extends the
+  boot-style mouse layout and requires report protocol (not strict boot protocol).
+- `HidSink` splits both movement and scroll totals into bounded reports, keeps
+  button state across reports, and releases held buttons when closed. It opens
+  an existing device write-only in unbuffered binary mode and writes each report
+  in one call; missing paths raise an error pointing to the gadget setup script.
 - `NullSink` for tests and `--dry-run`.
+- All sinks implement `close()` and support `with sink:` to close on exit.
+- Button numbers are 1 = left, 2 = right, 3 = middle; other numbers raise `ValueError`.
+- `NullSink.calls` records ordered tuples: `("move", dx, dy)`,
+  `("button", btn, down)`, `("scroll", n)`, and `("close",)`.
 - Report rate target: 120 Hz from the Controller, independent of sensor rate.
 
 ## Pro 3 specifics
@@ -44,7 +56,9 @@ AAPClient → MotionEngine → Controller → Sink
 - Buds in the case have sensors powered off. Test with buds in ears.
 
 ## Commands
-- Tests (no hardware): `python -m unittest discover -s tests`
+- Tests (no hardware): `python -m unittest discover -s tests` (also runs the 37 upstream tests)
+- Update upstream: `git subtree pull --prefix upstream https://github.com/starman-tech/mousepods main --squash`
+  on its own branch, then update `docs/upstream.md`. See that file for how upstream fits in.
 - Diagnostics on Pi: `python -m podsmouse.main --diag`
 - Dry run: `python -m podsmouse.main --sink null`
 - Gadget setup: `sudo gadget/setup-hid-gadget.sh` (idempotent; tears down and rebuilds)
@@ -68,8 +82,14 @@ The repository is the only shared memory, so keep it current.
    what you did, what is left, and anything the next agent must know. Update `docs/TASKS.md`.
 6. **Rebase, don't overwrite.** Rebase on `main` before opening a PR. If another agent's change
    conflicts with yours, keep theirs and adapt your change, then explain it in the PR.
-7. **Tests must pass.** Run `python -m unittest discover -s tests` before every push.
-8. **Attribution.** End commit messages with a trailer naming the agent, for example
+   Exception: a branch that contains a `git subtree` commit for `upstream/` is updated by merging
+   `main` into it, never rebased, and is merged on GitHub with "Create a merge commit" (a rebase or
+   squash loses the subtree metadata that `git subtree pull` needs).
+7. **Stacked PRs.** Prefer branching from `main`. If a PR must build on another unmerged PR, base it
+   on that branch, say so in the description, and retarget it to `main` once the first PR is merged.
+   Never merge a PR whose base is not `main`; it lands on the other branch, not on `main`.
+8. **Tests must pass.** Run `python -m unittest discover -s tests` before every push.
+9. **Attribution.** End commit messages with a trailer naming the agent, for example
    `Co-Authored-By: Codex <noreply@openai.com>` or `Co-Authored-By: Claude <noreply@anthropic.com>`.
 
 ## Phase order
