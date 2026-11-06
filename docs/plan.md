@@ -1,116 +1,116 @@
-# PodsMouse – plan for AirPods Pro 3 som mus i Windows
+# PodsMouse – plan for using AirPods Pro 3 as a mouse on Windows
 
-Sist oppdatert: 2026-11-06
+Last updated: 2026-11-06
 
-## Mål og avgrensning
+## Goals and scope
 
-Målet er at AirPods Pro 3 styrer musepekeren på en vanlig Windows-PC. Windows skal ikke trenge noen driver eller programvare. En Raspberry Pi Zero 2 W gjør jobben som Bluetooth-bro og dukker opp som en vanlig USB-mus. Utgangspunktet er [mousepods](https://github.com/starman-tech/mousepods) (Apache-2.0).
+The goal is for AirPods Pro 3 to control the mouse pointer on an ordinary Windows PC, with no driver or software installed on Windows. A Raspberry Pi Zero 2 W acts as a Bluetooth bridge and appears to the PC as a standard USB mouse. The starting point is [mousepods](https://github.com/starman-tech/mousepods) (Apache-2.0).
 
-**Leveres**
+**Deliverables**
 
-- Bekreftet sensorstrøm fra AirPods Pro 3 med dokumentert pakkeformat
-- Musemodus der hodebevegelse flytter pekeren, med rekalibrering
-- Klikk ved trykk på stilken, hodenikk eller dwell (pekeren hviler en stund)
-- Pi-en vises som USB HID-mus, slik at Windows trenger null installasjon
-- Enkelt webgrensesnitt på Pi-en for batteri, kalibrering og rådata
+- A verified sensor stream from AirPods Pro 3, with a documented packet format
+- Mouse mode, where head movement moves the pointer, with recentering
+- Clicks by stem press, head nod or dwell (the pointer resting in place for a moment)
+- The Pi appears as a USB HID mouse, so Windows needs no installation
+- A simple web UI on the Pi for battery, calibration and raw data
 
-**Utenfor første versjon**
+**Out of scope for the first version**
 
-- Lyd via Pi-en (USB-lydkort). Vurderes i fase 5.
-- Pointer- og Glide-modus fra mousepods
-- Andre AirPods-modeller enn Pro 3 (Pro 2 og AirPods 3 bør likevel virke)
-- Egen Windows-driver eller tjeneste
+- Audio through the Pi (USB sound card). Considered in phase 5.
+- Pointer and Glide modes from mousepods
+- AirPods models other than Pro 3 (Pro 2 and AirPods 3 should still work)
+- A custom Windows driver or service
 
-## Hvorfor en Pi-bro
+## Why a Pi bridge
 
-Windows har ikke noe API i brukermodus for egne Bluetooth Classic L2CAP-kanaler. AirPods sender sensordata over AACP på PSM `0x1001`, og den kanalen kan bare åpnes av en profildriver i kjernemodus, slik MagicPods gjør. En Pi med BlueZ har ikke den begrensningen.
+Windows has no user-mode API for custom Bluetooth Classic L2CAP channels. AirPods send sensor data over AACP on PSM `0x1001`, and that channel can only be opened by a kernel-mode profile driver, which is what MagicPods ships. A Pi running BlueZ has no such limitation.
 
-## Arkitektur
+## Architecture
 
 ```
-AirPods Pro 3 ──Bluetooth Classic, L2CAP PSM 0x1001──▶ Raspberry Pi Zero 2 W ──USB, HID-mus──▶ Windows-PC
+AirPods Pro 3 ──Bluetooth Classic, L2CAP PSM 0x1001──▶ Raspberry Pi Zero 2 W ──USB, HID mouse──▶ Windows PC
                                                        │
-                                                       ├─ AAPClient     åpner AACP-kanalen, leser sensorpakker
-                                                       ├─ MotionEngine  gravitasjon og gyro blir yaw og pitch
-                                                       ├─ Controller    glatting, akselerasjon, klikk, 120 Hz
-                                                       └─ HidSink (ny)  4-byte rapporter til /dev/hidg0
+                                                       ├─ AAPClient     opens the AACP channel, reads sensor packets
+                                                       ├─ MotionEngine  turns gravity and gyro into yaw and pitch
+                                                       ├─ Controller    smoothing, acceleration, clicks, 120 Hz
+                                                       └─ HidSink (new) 4-byte reports to /dev/hidg0
 ```
 
-Det eneste som må skrives nytt i hovedløpet er `HidSink`, som erstatter `/dev/uinput`. Windows ser Pi-en som en standard HID-mus og bruker den innebygde driveren. Derfor fungerer det også på låste maskiner der du ikke kan installere noe.
+The only new code in the main path is `HidSink`, which replaces `/dev/uinput`. Windows sees the Pi as a standard HID mouse and uses its built-in driver, so it also works on locked-down machines where you cannot install anything.
 
-## Maskinvare og innkjøp
+## Hardware
 
-| Del | Hvorfor | Merknad |
+| Part | Why | Note |
 | --- | --- | --- |
-| Raspberry Pi Zero 2 W | Bluetooth og USB OTG på ett kort | Velg gjerne en versjon med loddede pinner |
-| microSD 16–32 GB | Raspberry Pi OS Lite (Bookworm, 64-bit) | A1/A2-klasse |
-| Micro-USB-datakabel til USB-A/C | Gir strøm og HID-forbindelse til PC-en | Må være en datakabel, ikke bare ladekabel. Bruk *USB*-porten, ikke *PWR* |
-| Enkelt kabinett | Beskytter kortet på pulten | Valgfritt |
-| (Fase 0) Linux-PC eller laptop med Bluetooth | Kartlegge Pro 3 før Pi-en er på plass | Live-USB med Ubuntu holder |
+| Raspberry Pi Zero 2 W | Bluetooth and USB OTG on one board | A version with pre-soldered headers is handy |
+| microSD card, 16–32 GB | Raspberry Pi OS Lite (Bookworm, 64-bit) | A1/A2 class |
+| Micro-USB data cable to USB-A/C | Powers the Pi and carries the HID connection to the PC | Must be a data cable, not charge-only. Use the *USB* port, not *PWR* |
+| Simple case | Protects the board on the desk | Optional |
+| (Phase 0) Linux PC or laptop with Bluetooth | Map the Pro 3 before the Pi is in place | A live USB with Ubuntu is enough |
 
-## Faser
+## Phases
 
-Fase 0 er den viktigste. Den avgjør om Pro 3 i det hele tatt gir sensordata utenfor Apple-økosystemet, og den kan gjøres på en hvilken som helst Linux-maskin med Bluetooth før Pi-en er kjøpt. Hver fase er ferdig først når akseptkriteriet er oppfylt på ekte maskinvare.
+Phase 0 is the most important. It decides whether the Pro 3 delivers sensor data outside the Apple ecosystem at all, and it can be done on any Linux machine with Bluetooth before a Pi is bought. A phase is only done when its acceptance check passes on real hardware.
 
-| Fase | Innhold | Akseptkriterium | Trenger Pi |
+| Phase | Work | Acceptance check | Needs Pi |
 | --- | --- | --- | --- |
-| 0. Kartlegging av Pro 3 | Kjør mousepods `--diag` og sensorutforskeren mot Pro 3. Lagre råfangster i `captures/pro3/`. Finn ut om Pro 3 bruker SensorDataWX som Pro 2, eller noe nytt. | Stabil strøm med kjent frekvens (Hz) i minst 10 min. Akser identifisert. | Nei |
-| 1. Pi-oppsett | Pi OS Lite, BlueZ, PSM 0x1001 tillatt, MTU 2582, paring med Pro 3 | `--diag` gir samme strøm på Pi-en som i fase 0 | Ja |
-| 2. USB HID-gadget | configfs-gadget med relativ mus (knapper, X/Y, hjul). Et testskript som tegner en firkant. | Windows ser «HID-compliant mouse» uten driver, og pekeren tegner firkanten | Ja |
-| 3. Kobling | Bytt mousepods sin `uinput`-utgang mot en `HidSink` som skriver til `/dev/hidg0` | Hodebevegelse flytter pekeren i Windows med under 30 ms forsinkelse | Ja |
-| 4. Brukbarhet | Kalibrering, rekalibrering, klikk, pause og autostart som systemd-tjeneste | 15 min vanlig bruk (åpne apper, klikke knapper) uten at du må ta i musa | Ja |
-| 5. Valgfritt | USB-lydkort via Pi-en (A2DP til AirPods) og Pointer-modus | Lyd og styring samtidig over én kabel | Ja |
+| 0. Map the Pro 3 | Run mousepods `--diag` and the sensor explorer against the Pro 3. Save raw captures to `captures/pro3/`. Find out whether the Pro 3 uses SensorDataWX like the Pro 2, or something new. | Stable stream at a known rate (Hz) for at least 10 min. Axes identified. | No |
+| 1. Pi setup | Pi OS Lite, BlueZ, PSM 0x1001 allowed, MTU 2582, pairing with the Pro 3 | `--diag` on the Pi gives the same stream as in phase 0 | Yes |
+| 2. USB HID gadget | configfs gadget with a relative mouse (buttons, X/Y, wheel). A test script that draws a square. | Windows shows "HID-compliant mouse" with no driver, and the pointer draws the square | Yes |
+| 3. Wiring | Replace the mousepods `uinput` output with a `HidSink` that writes to `/dev/hidg0` | Head movement moves the Windows pointer with under 30 ms latency | Yes |
+| 4. Usability | Calibration, recentering, clicks, pause, and autostart as a systemd service | 15 min of normal use (opening apps, clicking buttons) without touching the mouse | Yes |
+| 5. Optional | USB sound card through the Pi (A2DP to the AirPods) and Pointer mode | Audio and control at the same time over one cable | Yes |
 
-## Repostruktur og gjenbruk
+## Repository layout and reuse
 
-Repoet bygger på mousepods, slik at protokollkoden og testene følger med. Den nye koden holdes i egne moduler, slik at det er enkelt å hente inn endringer fra upstream. `LICENSE` og `NOTICE` fra upstream må beholdes uendret. Alt fra upstream `docs/` og `captures/` (CC BY 4.0) som brukes, må krediteres.
+The repository builds on mousepods, so the protocol code and tests come along. New code lives in separate modules, which keeps it easy to pull in upstream changes. The upstream `LICENSE` and `NOTICE` must be kept unchanged. Anything reused from upstream `docs/` and `captures/` (CC BY 4.0) must be attributed.
 
 ```
 podsmouse/
-├── CLAUDE.md                 # instrukser for Claude Code
-├── upstream/                 # mousepods som git subtree, ikke rediger her
+├── CLAUDE.md                 # instructions for Claude Code
+├── upstream/                 # mousepods as a git subtree, do not edit
 ├── podsmouse/
 │   ├── sinks/
-│   │   ├── base.py           # Sink-grensesnitt: move(dx,dy), button(b,down), scroll(n)
-│   │   ├── hid_gadget.py     # skriver 4-byte rapporter til /dev/hidg0
-│   │   └── null.py           # for tester og --dry-run
-│   ├── models/pro3.py        # Pro 3-spesifikk parsing hvis fase 0 krever det
-│   └── main.py               # starter AAPClient → MotionEngine → Controller → Sink
+│   │   ├── base.py           # Sink interface: move(dx,dy), button(b,down), scroll(n)
+│   │   ├── hid_gadget.py     # writes 4-byte reports to /dev/hidg0
+│   │   └── null.py           # for tests and --dry-run
+│   ├── models/pro3.py        # Pro 3-specific parsing, if phase 0 requires it
+│   └── main.py               # wires AAPClient → MotionEngine → Controller → Sink
 ├── gadget/
-│   ├── setup-hid-gadget.sh   # configfs: VID/PID, HID-deskriptor, UDC-binding
-│   └── hid-mouse.desc        # rapportdeskriptor (relativ mus, 3 knapper, hjul)
+│   ├── setup-hid-gadget.sh   # configfs: VID/PID, HID descriptor, UDC binding
+│   └── hid-mouse.desc        # report descriptor (relative mouse, 3 buttons, wheel)
 ├── systemd/
 │   ├── podsmouse-gadget.service
 │   └── podsmouse.service
-├── captures/pro3/            # råfangster fra fase 0
-├── docs/pro3-findings.md     # pakkeformat, akser og frekvens for Pro 3
-└── tests/                    # upstream-testene + tester av sinks og Pro 3-parser
+├── captures/pro3/            # raw captures from phase 0
+├── docs/pro3-findings.md     # packet format, axes and rate for the Pro 3
+└── tests/                    # upstream tests + tests for sinks and the Pro 3 parser
 ```
 
-**Gjenbrukes direkte:** `AAPClient`, `MotionEngine` (gravitasjon og gyro-bias), One-Euro-glatting, webgrensesnittet og de 37 testene som ikke krever maskinvare.
+**Reused as is:** `AAPClient`, `MotionEngine` (gravity and gyro bias), One-Euro smoothing, the web UI, and the 37 tests that need no hardware.
 
-**Byttes ut:** utgangen til `/dev/uinput` erstattes av `HidSink`. Hurtigtaster på Linux-skrivebordet erstattes av stilk-gester og knapper i webgrensesnittet, siden Pi-en ikke har tastatur.
+**Replaced:** the `/dev/uinput` output is replaced by `HidSink`. Linux desktop hotkeys are replaced by stem gestures and buttons in the web UI, since the Pi has no keyboard.
 
-## Risikoer og åpne spørsmål
+## Risks and open questions
 
-Den største risikoen er at Pro 3 ikke gir sensordata eller krever en ukjent startpakke. Det avklares i fase 0 før det brukes penger på Pi.
+The biggest risk is that the Pro 3 delivers no sensor data, or needs an unknown start packet. Phase 0 settles this before any money is spent on a Pi.
 
-| Risiko | Konsekvens | Tiltak |
+| Risk | Impact | Mitigation |
 | --- | --- | --- |
-| Pro 3 bruker et nytt eller låst sensorformat | Prosjektet stopper i fase 0 | Prøv begge kjente startpakker (som HT_START i pods-head-tracker), sammenlign med Pro 2-fangster, og spør i LibrePods-Discord |
-| Lav frekvens (≈25 Hz som Pro 2) | Pekeren føles hakkete | Kjør HID på 120 Hz med prediksjon/interpolering. Juster One-Euro. |
-| AirPods kobles bare til én vert om gangen | Ingen lyd på PC-en mens Pi-en har AirPods | Godta det i v1, og løs det med USB-lyd via Pi-en i fase 5 |
-| Firmware-oppdatering fra Apple endrer protokollen | Sensorstrømmen stopper | Lagre fangster per firmware og logg versjonen ved oppkobling |
-| Pi Zero 2 W blir for svak | Forsinkelse eller tap av pakker | Mål CPU-bruk i fase 3. Pi 4 er reserve. |
+| The Pro 3 uses a new or locked sensor format | The project stops at phase 0 | Try both known start packets (like HT_START in pods-head-tracker), compare with Pro 2 captures, and ask on the LibrePods Discord |
+| Low sample rate (≈25 Hz like the Pro 2) | The pointer feels jerky | Run HID at 120 Hz with prediction/interpolation. Tune One-Euro. |
+| AirPods connect to only one host at a time | No audio on the PC while the Pi holds the AirPods | Accept it in v1, and solve it with USB audio through the Pi in phase 5 |
+| An Apple firmware update changes the protocol | The sensor stream stops | Keep captures per firmware version and log the version on connect |
+| The Pi Zero 2 W is too slow | Latency or dropped packets | Measure CPU use in phase 3. A Pi 4 is the fallback. |
 
-**Åpne spørsmål**
+**Open questions**
 
-- Hvilken firmware har Pro 3-ene, og er de paret med en iPhone som kan oppdatere dem?
-- Hvilken klikkmetode skal være standard: trykk på stilken, hodenikk eller dwell?
+- Which firmware are the Pro 3 on, and are they paired with an iPhone that can update them?
+- Which click method should be the default: stem press, head nod or dwell?
 
-## Kilder
+## Sources
 
 - [starman-tech/mousepods](https://github.com/starman-tech/mousepods)
-- [pods-head-tracker (Pi-bro for OpenTrack)](https://github.com/batubozkan/pods-head-tracker/releases)
-- [sony-head-tracker wiki: hvorfor AirPods ikke fungerer direkte på Windows](https://github.com/NicholasSlattery/sony-head-tracker/wiki)
+- [pods-head-tracker (Pi bridge for OpenTrack)](https://github.com/batubozkan/pods-head-tracker/releases)
+- [sony-head-tracker wiki: why AirPods cannot work directly on Windows](https://github.com/NicholasSlattery/sony-head-tracker/wiki)
 - [LibrePods discussion #259](https://github.com/librepods-org/librepods/discussions/259)
