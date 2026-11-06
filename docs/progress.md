@@ -3,6 +3,20 @@
 Newest entry first. Every agent appends an entry before it stops working.
 Format: date, agent, what was done, what is left, notes for the next agent.
 
+## 2026-11-06 – claude (T08, branch claude/main-cli)
+- Added `podsmouse/pointer.py` (`SinkPointer`: upstream Pointer interface over a Sink; keeps fractional
+  remainders for move and scroll; `move_abs` is a no-op with a one-time warning) and `podsmouse/main.py`.
+- `main` reuses upstream `run()` unchanged by replacing `upstream.Pointer` with our adapter. Flags:
+  `--sink hid|null`, `--hid-device`, `--config`, `--diag`, `--web-port`, `--no-web`, `-v`.
+  `--sink null` uses a bounded `DryRunSink` that logs totals once per second.
+- Tests (96 total, all pass): CLI wiring with a fake upstream, plus the real upstream Controller driving
+  `NullSink` and `HidSink` (head right -> pointer right, head up -> pointer up, valid int8 HID reports), and a
+  replay of upstream's recorded AirPods 3 capture through our output path.
+- Smoke test without Bluetooth: starts, web UI up, retries connection with backoff, Ctrl-C exits cleanly.
+- Not run on a Pi, with AirPods, or with Windows. `podsmouse.service` (T10) should now start.
+- Web UI is on 127.0.0.1 only; use an SSH tunnel from the PC (see `docs/upstream.md`). Relevant for T11.
+- Next: T01 and T07 on hardware (maintainer), then T11.
+
 ## 2026-11-06 – claude (T10, branch claude/systemd)
 - Added a rule to `AGENTS.md` on stacked PRs and on merging (not rebasing) branches that touch `upstream/`.
 - Added `systemd/podsmouse-gadget.service` (root oneshot: builds the gadget, `/dev/hidg0` to group
