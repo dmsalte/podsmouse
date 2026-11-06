@@ -11,7 +11,7 @@ Status values: `todo`, `in progress`, `review`, `done`, `blocked`.
 | T01 | 0 | Run mousepods `--diag` against AirPods Pro 3, save raw captures to `captures/pro3/` | yes | maintainer | todo | |
 | T02 | 0 | Write `docs/pro3-findings.md` from the captures (packet layout, axes, rate, start packet) | no | | blocked (T01) | |
 | T03 | 1 | Vendor mousepods into `upstream/` as a git subtree | no | | todo | |
-| T04 | 2 | `Sink` interface, `NullSink` and unit tests | no | codex | in progress | codex/sinks |
+| T04 | 2 | `Sink` interface, `NullSink` and unit tests | no | codex | review | codex/sinks |
 | T05 | 2 | `HidSink` (4-byte reports, clamp and split) and unit tests against a fake device file | no | | todo | |
 | T06 | 2 | `gadget/hid-mouse.desc` and idempotent `gadget/setup-hid-gadget.sh` (configfs) | no | claude | review | claude/hid-gadget |
 | T07 | 2 | Square-drawing test script; verify on Windows | yes | | todo | |
