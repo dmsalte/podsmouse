@@ -3,6 +3,32 @@
 Newest entry first. Every agent appends an entry before it stops working.
 Format: date, agent, what was done, what is left, notes for the next agent.
 
+## 2026-11-06 – claude (landing T05, branch claude/land-t05)
+- PR #3 (T05) was based on `codex/sinks`, so merging it put `HidSink` into `codex/sinks`, not `main`.
+- Merged `codex/sinks` into `main` on `claude/land-t05` without changing Codex's code; only resolved
+  conflicts in this log and `docs/TASKS.md`. T03, T04, T05 and T06 are now done.
+- Lesson for stacked PRs: after the base PR merges, retarget the dependent PR to `main` before merging it.
+
+## 2026-11-06 – codex – T05
+- Added `HidSink`, exported it from `podsmouse.sinks`, and documented the shared
+  four-byte report contract in its docstring and `AGENTS.md`.
+- Writes each report in one unbuffered binary write, preserves held buttons,
+  and splits large X/Y movements and wheel steps into -127..127 chunks without
+  losing totals. Closing releases held buttons and closes even if release fails.
+- Missing devices raise `FileNotFoundError` naming `gadget/setup-hid-gadget.sh`;
+  opening never creates a regular file. Short writes fail without fragment retries.
+- Simulation only: all 33 stdlib tests pass on Python 3.12.14, including 22 HID
+  sink tests against temporary regular files, 6 NullSink/interface tests, and
+  the 5 existing descriptor tests. Python 3.11 syntax checked; no 3.11 interpreter
+  is installed here. Nothing has been run on a Pi or Windows, or real AirPods.
+- Left: review T04 and T05, wire the sinks into the CLI (T08), and verify gadget
+  behavior and the phase acceptance checks on real hardware (T07 and later).
+- T04 is PR #2 (`codex/sinks` -> `main`). Following the one-task-per-PR rule,
+  T05 is on `codex/hid-sink`, with a PR based on `codex/sinks`. Merge T04 first,
+  then rebase/retarget T05 onto `main`; do not merge the dependency twice.
+- The existing T06 descriptor and its tests match the reports. No changes were
+  made to `gadget/`, `upstream/`, or `systemd/`.
+
 ## 2026-11-06 – claude (T03, branch claude/vendor-upstream)
 - Vendored starman-tech/mousepods at `79736c7` into `upstream/` with `git subtree add --squash`.
   Upstream files are unchanged; its LICENSE and NOTICE are kept.
