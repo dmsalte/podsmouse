@@ -17,5 +17,5 @@ Status values: `todo`, `in progress`, `review`, `done`, `blocked`.
 | T07 | 2 | Square-drawing test script; verify on Windows | yes | | todo | |
 | T08 | 3 | `podsmouse/main.py` wiring upstream pipeline to a Sink, with `--sink` and `--diag` | no | | blocked (T03, T04) | |
 | T09 | 3 | Pro 3 parser in `podsmouse/models/pro3.py`, if T02 shows it differs from Pro 2 | no | | blocked (T02) | |
-| T10 | 4 | systemd units for gadget and service, autostart on boot | no | | todo | |
+| T10 | 4 | systemd units for gadget and service, autostart on boot | no | claude | in progress | claude/systemd |
 | T11 | 4 | Calibration, recenter and click methods tuned on hardware | yes | | blocked (T08) | |
