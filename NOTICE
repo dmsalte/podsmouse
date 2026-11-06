@@ -1,0 +1,8 @@
+PodsMouse
+
+This project builds on MousePods by Matteo Gaudioso (starman-tech),
+https://github.com/starman-tech/mousepods, licensed under the Apache License 2.0.
+
+When upstream code is vendored into upstream/, its LICENSE and NOTICE files are
+kept unchanged. Material reused from upstream docs/ and captures/ is licensed
+under CC BY 4.0 and is attributed to the original repository, with changes noted.
