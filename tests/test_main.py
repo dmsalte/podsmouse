@@ -4,8 +4,10 @@ import json
 import pathlib
 import struct
 import tempfile
+import sys
 import types
 import unittest
+from unittest import mock
 
 from podsmouse import main as pm
 from podsmouse.pointer import SinkPointer
@@ -17,7 +19,7 @@ CAPTURE = pm.UPSTREAM_DIR / "captures" / "airpods3_motion_capture.json"
 
 def fake_upstream():
     """A stand-in for the upstream module that records how main() calls it."""
-    up = types.SimpleNamespace(calls=[], Pointer=None)
+    up = types.SimpleNamespace(calls=[], Pointer=None, notify=lambda cfg, text: None)
     up.load_config = lambda path: {"mode": "souris", "_path": path}
 
     def run(cfg, cfg_path, diag=False, web_port=8737):
@@ -64,7 +66,7 @@ class CliTest(unittest.TestCase):
 
     def test_rejects_unknown_sink(self):
         with self.assertRaises(SystemExit):
-            pm.parse_args(["--sink", "uinput"])
+            pm.parse_args(["--sink", "bogus"])
 
     def test_null_sink_runs_upstream_with_sink_pointer(self):
         up = fake_upstream()
@@ -110,6 +112,51 @@ class CliTest(unittest.TestCase):
         with self.assertLogs("podsmouse", level="WARNING") as logs:
             pm.main(["--sink", "null", "--config", self.cfg, "--no-web"], upstream=up)
         self.assertTrue(any("souris" in line for line in logs.output))
+
+
+class DesktopModesTest(unittest.TestCase):
+    """--sink uinput and --calibrate, for testing on a Linux desktop."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.cfg = pathlib.Path(self.tmp.name) / "config.json"
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_uinput_without_evdev_fails_cleanly(self):
+        up = fake_upstream()
+        with mock.patch.dict(sys.modules, {"evdev": None}), self.assertLogs("podsmouse", "ERROR") as logs:
+            rc = pm.main(["--sink", "uinput", "--config", str(self.cfg), "--no-web"], upstream=up)
+        self.assertEqual(rc, 1)
+        self.assertEqual(up.calls, [])
+        self.assertIn("python3-evdev", logs.output[0])
+
+    def test_uinput_keeps_upstream_pointer(self):
+        up = fake_upstream()
+        sentinel = types.SimpleNamespace(close=lambda: None)
+        up.Pointer = lambda: sentinel
+        with mock.patch.dict(sys.modules, {"evdev": types.ModuleType("evdev")}):
+            rc = pm.main(["--sink", "uinput", "--config", str(self.cfg), "--no-web"], upstream=up)
+        self.assertEqual(rc, 0)
+        self.assertIs(up.calls[0]["ptr"], sentinel)
+
+    def test_calibrate_without_tkinter_fails_cleanly(self):
+        up = fake_upstream()
+        with mock.patch.dict(sys.modules, {"tkinter": None}), self.assertLogs("podsmouse", "ERROR"):
+            rc = pm.main(["--calibrate", "--config", str(self.cfg)], upstream=up)
+        self.assertEqual(rc, 1)
+
+    def test_calibrate_creates_config_and_calls_upstream(self):
+        up = fake_upstream()
+        seen = []
+        up.calibrate = lambda cfg, path: seen.append((path, pathlib.Path(path).read_text()))
+        fake_tk = types.SimpleNamespace(Misc=type("Misc", (), {"configure": lambda self, cnf=None, **kw: None}))
+        with mock.patch.dict(sys.modules, {"tkinter": fake_tk}):
+            rc = pm.main(["--calibrate", "--config", str(self.cfg)], upstream=up)
+        self.assertEqual(rc, 0)
+        self.assertEqual(seen, [(str(self.cfg), "{}\n")])
+        self.assertEqual(up.calls, [])  # calibration does not start the mouse
 
 
 class DryRunSinkTest(unittest.TestCase):
