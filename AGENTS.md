@@ -29,6 +29,14 @@ AAPClient → MotionEngine → Controller → Sink
 - `Sink` interface (`podsmouse/sinks/base.py`): `move(dx, dy)`, `button(btn, down)`, `scroll(n)`.
 - `HidSink` writes 4-byte reports `[buttons, dx, dy, wheel]` (signed int8, clamp ±127, split larger moves)
   to `/dev/hidg0`. Report descriptor is in `gadget/hid-mouse.desc` and must match.
+- HID byte 0 is bits 0/1/2 = left/right/middle plus five zero padding bits;
+  bytes 1/2/3 are signed relative X/Y/wheel (-127..127), with no report ID.
+  Y positive is down; wheel positive is up. The four-byte layout extends the
+  boot-style mouse layout and requires report protocol (not strict boot protocol).
+- `HidSink` splits both movement and scroll totals into bounded reports, keeps
+  button state across reports, and releases held buttons when closed. It opens
+  an existing device write-only in unbuffered binary mode and writes each report
+  in one call; missing paths raise an error pointing to the gadget setup script.
 - `NullSink` for tests and `--dry-run`.
 - All sinks implement `close()` and support `with sink:` to close on exit.
 - Button numbers are 1 = left, 2 = right, 3 = middle; other numbers raise `ValueError`.
