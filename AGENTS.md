@@ -61,6 +61,8 @@ AAPClient → MotionEngine → Controller → Sink
   on its own branch, then update `docs/upstream.md`. See that file for how upstream fits in.
 - Diagnostics on Pi: `python -m podsmouse.main --diag`
 - Dry run: `python -m podsmouse.main --sink null`
+- Run on the Pi: `python -m podsmouse.main --sink hid --config PATH` (also `--hid-device`, `--web-port`, `--no-web`, `-v`).
+  These flags are a shared interface: `systemd/podsmouse.service` depends on `--sink` and `--config`.
 - Gadget setup: `sudo gadget/setup-hid-gadget.sh` (idempotent; tears down and rebuilds)
 
 ## Working together (multiple agents)

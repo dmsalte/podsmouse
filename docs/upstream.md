@@ -41,12 +41,25 @@ Everything lives in one module, `upstream/airpods_mouse_controller.py`:
 | `scroll(lines)` | float lines; fractional remainder kept | `scroll(int n)` after accumulating fractions |
 | `close()` | release devices | `close()` |
 
-So T08 needs a small adapter (`SinkPointer`) that exposes this interface on top of any `Sink`,
-keeps the fractional remainders, and is passed to `Controller` instead of `Pointer`.
-`Controller.__init__` takes the pointer as an argument (`self.ptr = pointer`), but `run()` builds it
-itself: `ptr = NullPointer() if diag else Pointer()`. T08 must therefore either reimplement the
-small `run()` loop in `podsmouse/main.py` around `AAPClient`, `Controller` and our adapter, or
-monkeypatch `Pointer` before calling `run()`. Reimplementing is cleaner and keeps `upstream/` untouched.
-`move_abs(0.5, 0.5)` is also called on recenter in mouse mode, so the adapter must accept it as a no-op.
+## How T08 wires it (done)
+
+- `podsmouse/pointer.py` – `SinkPointer` implements the table above on top of any `Sink`.
+- `podsmouse/main.py` – imports upstream, sets `upstream.Pointer = lambda: SinkPointer(sink)` and then calls
+  upstream `run()` unchanged. That reuses all of upstream's run loop (reconnect with backoff, stem gestures,
+  stuck-sensor recovery, config hot reload, web UI) instead of copying ~120 lines of it.
+  Trade-off: if upstream renames `Pointer` or changes how `run()` builds it, `tests/test_main.py` will not
+  catch it (it uses a fake upstream for the CLI tests). Check `run()` when updating the subtree.
+- In `--diag` mode upstream uses its own `NullPointer` and no sink is opened.
+- Mode `pointeur` (absolute positioning) cannot work over a relative HID mouse; `main` warns about it.
+
+## Web UI on the Pi
+
+Upstream's web UI binds to `127.0.0.1:8737` only. On a headless Pi, reach it from your PC with an SSH tunnel:
+
+```
+ssh -L 8737:127.0.0.1:8737 <user>@<pi-address>
+```
+
+then open http://127.0.0.1:8737 on the PC. Calibration also runs from there.
 
 Upstream comments and log messages are mostly in French.
