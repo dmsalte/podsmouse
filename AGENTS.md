@@ -48,7 +48,9 @@ AAPClient → MotionEngine → Controller → Sink
 - Buds in the case have sensors powered off. Test with buds in ears.
 
 ## Commands
-- Tests (no hardware): `python -m unittest discover -s tests`
+- Tests (no hardware): `python -m unittest discover -s tests` (also runs the 37 upstream tests)
+- Update upstream: `git subtree pull --prefix upstream https://github.com/starman-tech/mousepods main --squash`
+  on its own branch, then update `docs/upstream.md`. See that file for how upstream fits in.
 - Diagnostics on Pi: `python -m podsmouse.main --diag`
 - Dry run: `python -m podsmouse.main --sink null`
 - Gadget setup: `sudo gadget/setup-hid-gadget.sh` (idempotent; tears down and rebuilds)

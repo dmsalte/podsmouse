@@ -1,8 +1,26 @@
 PodsMouse
 
 This project builds on MousePods by Matteo Gaudioso (starman-tech),
-https://github.com/starman-tech/mousepods, licensed under the Apache License 2.0.
+https://github.com/starman-tech/mousepods, vendored unchanged in upstream/.
 
-When upstream code is vendored into upstream/, its LICENSE and NOTICE files are
-kept unchanged. Material reused from upstream docs/ and captures/ is licensed
-under CC BY 4.0 and is attributed to the original repository, with changes noted.
+Attribution required by the MousePods NOTICE (Apache-2.0 section 4(d)):
+
+  MousePods
+  Copyright 2026 Matteo Gaudioso (starman-tech) — https://github.com/starman-tech/mousepods
+
+  This product includes software and research developed by Matteo Gaudioso:
+  the first public documentation of how AirPods (3rd generation) expose their
+  motion sensors through Apple RemoteHID (HID over AACP), and the MousePods
+  Linux head mouse built on it.
+
+Licensing:
+  * MousePods source code (upstream/) ................ Apache License 2.0 (upstream/LICENSE)
+  * MousePods docs and captures (upstream/docs, upstream/captures)
+                                                        Creative Commons Attribution 4.0
+                                                        (upstream/docs/LICENSE-CC-BY-4.0.txt)
+
+The full MousePods NOTICE is kept unchanged in upstream/NOTICE. Material reused from
+the MousePods docs and captures is credited to "Matteo Gaudioso (starman-tech), MousePods",
+links to the repository above, and states any changes made.
+
+Not affiliated with Apple Inc. AirPods is a trademark of Apple Inc.
