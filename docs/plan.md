@@ -67,7 +67,8 @@ The repository builds on mousepods, so the protocol code and tests come along. N
 
 ```
 podsmouse/
-├── CLAUDE.md                 # instructions for Claude Code
+├── AGENTS.md                 # shared instructions for all coding agents (Codex, Claude Code, ...)
+├── CLAUDE.md                 # imports AGENTS.md
 ├── upstream/                 # mousepods as a git subtree, do not edit
 ├── podsmouse/
 │   ├── sinks/
@@ -83,7 +84,11 @@ podsmouse/
 │   ├── podsmouse-gadget.service
 │   └── podsmouse.service
 ├── captures/pro3/            # raw captures from phase 0
-├── docs/pro3-findings.md     # packet format, axes and rate for the Pro 3
+├── docs/
+│   ├── plan.md               # this plan
+│   ├── TASKS.md              # task list; agents claim tasks here
+│   ├── progress.md           # handoff log between agents and sessions
+│   └── pro3-findings.md      # packet format, axes and rate for the Pro 3
 └── tests/                    # upstream tests + tests for sinks and the Pro 3 parser
 ```
 
