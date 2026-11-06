@@ -3,6 +3,16 @@
 Newest entry first. Every agent appends an entry before it stops working.
 Format: date, agent, what was done, what is left, notes for the next agent.
 
+## 2026-11-06 – claude (T10, branch claude/systemd)
+- Added a rule to `AGENTS.md` on stacked PRs and on merging (not rebasing) branches that touch `upstream/`.
+- Added `systemd/podsmouse-gadget.service` (root oneshot: builds the gadget, `/dev/hidg0` to group
+  `podsmouse`) and `systemd/podsmouse.service` (user `podsmouse`, sandboxed, restarts on failure).
+- Added `systemd/README.md` with install steps for `/opt/podsmouse`.
+- `podsmouse.service` expects T08 to provide `python3 -m podsmouse.main --sink hid --config PATH`.
+  It fails to start until T08 lands; the gadget unit works on its own.
+- Tested in simulation only: `systemd-analyze verify` passes with the repo at `/opt/podsmouse`.
+  Not run on a Pi. The sandboxing may need loosening once tested on hardware.
+
 ## 2026-11-06 – claude (landing T05, branch claude/land-t05)
 - PR #3 (T05) was based on `codex/sinks`, so merging it put `HidSink` into `codex/sinks`, not `main`.
 - Merged `codex/sinks` into `main` on `claude/land-t05` without changing Codex's code; only resolved

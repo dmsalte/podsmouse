@@ -1,0 +1,20 @@
+# Builds the USB HID mouse gadget at boot so /dev/hidg0 exists before podsmouse.service starts.
+# Runs as root (configfs needs it); hands /dev/hidg0 to group "podsmouse".
+# Install: see systemd/README.md
+
+[Unit]
+Description=PodsMouse USB HID gadget (Pi appears to the PC as a mouse)
+Documentation=file:///opt/podsmouse/gadget/README.md
+After=systemd-modules-load.service sys-kernel-config.mount
+Wants=sys-kernel-config.mount
+Before=podsmouse.service
+ConditionPathExists=/opt/podsmouse/gadget/setup-hid-gadget.sh
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/opt/podsmouse/gadget/setup-hid-gadget.sh --group podsmouse
+ExecStop=/opt/podsmouse/gadget/setup-hid-gadget.sh --remove
+
+[Install]
+WantedBy=multi-user.target

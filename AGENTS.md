@@ -82,8 +82,14 @@ The repository is the only shared memory, so keep it current.
    what you did, what is left, and anything the next agent must know. Update `docs/TASKS.md`.
 6. **Rebase, don't overwrite.** Rebase on `main` before opening a PR. If another agent's change
    conflicts with yours, keep theirs and adapt your change, then explain it in the PR.
-7. **Tests must pass.** Run `python -m unittest discover -s tests` before every push.
-8. **Attribution.** End commit messages with a trailer naming the agent, for example
+   Exception: a branch that contains a `git subtree` commit for `upstream/` is updated by merging
+   `main` into it, never rebased, and is merged on GitHub with "Create a merge commit" (a rebase or
+   squash loses the subtree metadata that `git subtree pull` needs).
+7. **Stacked PRs.** Prefer branching from `main`. If a PR must build on another unmerged PR, base it
+   on that branch, say so in the description, and retarget it to `main` once the first PR is merged.
+   Never merge a PR whose base is not `main`; it lands on the other branch, not on `main`.
+8. **Tests must pass.** Run `python -m unittest discover -s tests` before every push.
+9. **Attribution.** End commit messages with a trailer naming the agent, for example
    `Co-Authored-By: Codex <noreply@openai.com>` or `Co-Authored-By: Claude <noreply@anthropic.com>`.
 
 ## Phase order
