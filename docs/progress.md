@@ -3,6 +3,15 @@
 Newest entry first. Every agent appends an entry before it stops working.
 Format: date, agent, what was done, what is left, notes for the next agent.
 
+## 2026-11-06 – claude (T10, branch claude/systemd)
+- Added `systemd/podsmouse-gadget.service` (root oneshot: builds the gadget, `/dev/hidg0` to group
+  `podsmouse`) and `systemd/podsmouse.service` (user `podsmouse`, sandboxed, restarts on failure).
+- Added `systemd/README.md` with install steps for `/opt/podsmouse`.
+- `podsmouse.service` expects T08 to provide `python3 -m podsmouse.main --sink hid --config PATH`.
+  It fails to start until T08 lands; the gadget unit works on its own.
+- Tested in simulation only: `systemd-analyze verify` passes with the repo at `/opt/podsmouse`.
+  Not run on a Pi. The sandboxing may need loosening once tested on hardware.
+
 ## 2026-11-06 – claude (T06, branch claude/hid-gadget)
 - Added `gadget/hid-mouse.desc`: annotated hex report descriptor, 52 bytes, 4-byte report
   `[buttons, X, Y, wheel]`, no report ID, X/Y/wheel signed int8 -127..127 relative.

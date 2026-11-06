@@ -1,0 +1,43 @@
+# Runs the PodsMouse head mouse as an unprivileged user.
+# Needs: the gadget (podsmouse-gadget.service) and BlueZ (bluetooth.service).
+# Install: see systemd/README.md
+
+[Unit]
+Description=PodsMouse (AirPods head mouse over USB HID)
+Documentation=file:///opt/podsmouse/README.md
+Requires=podsmouse-gadget.service
+After=podsmouse-gadget.service bluetooth.service
+Wants=bluetooth.service
+
+[Service]
+Type=simple
+User=podsmouse
+Group=podsmouse
+# bluetooth: lets the service ask BlueZ about paired devices (bluetoothctl info) over D-Bus.
+SupplementaryGroups=bluetooth
+WorkingDirectory=/opt/podsmouse
+Environment=PYTHONUNBUFFERED=1
+# Config and calibration persist in /var/lib/podsmouse; the control socket lives in /run/podsmouse.
+StateDirectory=podsmouse
+RuntimeDirectory=podsmouse
+Environment=XDG_RUNTIME_DIR=/run/podsmouse
+ExecStart=/usr/bin/python3 -m podsmouse.main --sink hid --config /var/lib/podsmouse/config.json
+Restart=on-failure
+RestartSec=5
+
+# Hardening. The service only needs Bluetooth sockets, /dev/hidg0, its state dir and a local web UI.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_BLUETOOTH AF_UNIX AF_INET AF_INET6
+DevicePolicy=closed
+DeviceAllow=/dev/hidg0 rw
+LockPersonality=yes
+RestrictRealtime=yes
+
+[Install]
+WantedBy=multi-user.target
