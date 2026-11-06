@@ -3,6 +3,18 @@
 Newest entry first. Every agent appends an entry before it stops working.
 Format: date, agent, what was done, what is left, notes for the next agent.
 
+## 2026-11-06 – codex – T04
+- Added the abstract `Sink` interface, package initializers, and recording `NullSink`.
+- Documented button numbering, invalid-button errors, context management, and the
+  `NullSink.calls` tuple format in `AGENTS.md` for consumers of the new interface.
+- Simulation only: all 11 stdlib unit tests pass on Python 3.12.14; Python 3.11
+  syntax was checked, but a Python 3.11 interpreter is unavailable here.
+  Nothing has been run on a Pi or Windows, or against real AirPods.
+- Left: review T04, implement T05, wire sinks into the CLI in T08, and run the
+  phase acceptance checks on hardware. `NullSink` records close calls too.
+- Following `AGENTS.md`, T04 uses `codex/sinks`; T05 will use its own dependent
+  branch and PR so each PR contains one task. Merge T04 before T05.
+
 ## 2026-11-06 – claude (T06, branch claude/hid-gadget)
 - Added `gadget/hid-mouse.desc`: annotated hex report descriptor, 52 bytes, 4-byte report
   `[buttons, X, Y, wheel]`, no report ID, X/Y/wheel signed int8 -127..127 relative.

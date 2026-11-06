@@ -30,6 +30,10 @@ AAPClient → MotionEngine → Controller → Sink
 - `HidSink` writes 4-byte reports `[buttons, dx, dy, wheel]` (signed int8, clamp ±127, split larger moves)
   to `/dev/hidg0`. Report descriptor is in `gadget/hid-mouse.desc` and must match.
 - `NullSink` for tests and `--dry-run`.
+- All sinks implement `close()` and support `with sink:` to close on exit.
+- Button numbers are 1 = left, 2 = right, 3 = middle; other numbers raise `ValueError`.
+- `NullSink.calls` records ordered tuples: `("move", dx, dy)`,
+  `("button", btn, down)`, `("scroll", n)`, and `("close",)`.
 - Report rate target: 120 Hz from the Controller, independent of sensor rate.
 
 ## Pro 3 specifics
