@@ -3,6 +3,20 @@
 Newest entry first. Every agent appends an entry before it stops working.
 Format: date, agent, what was done, what is left, notes for the next agent.
 
+## 2026-11-07 – claude (T13, branch claude/web-english)
+- `podsmouse/web_english.py`: English web UI at runtime, no upstream edits. The page is built from
+  `upstream/ui/index.html` with an exact-match replacement table and written to `ui-en.html` next to the config file
+  (rewritten on each start; first tried a temp file, but it leaked on SIGTERM). The server's label tables (models,
+  battery, ear state, AAP controls, HID usages, sensor services, aim/glide calibration steps) are replaced, and a
+  `WebUI` subclass translates the status line, calibration text and report kinds.
+- The page's JavaScript compares server values (`"en charge"`, `"déconnecté"`, the `"Nom"` label); the English page
+  compares the English values instead, and a test checks both sides match.
+- `tests/test_web_english.py` fails if a replacement stops matching upstream, if accented French is left on the page
+  (comments excluded), or if upstream adds French server text. The two web log messages are in `english.LOG_TEMPLATES`.
+- Left in French on purpose: HTTP API error bodies (`introuvable`, `JSON invalide`); the page never shows them.
+- Tested in simulation only (122 tests) plus a smoke run of `--sink null` without Bluetooth: the page and
+  `/api/stream` status are English. Not checked with AirPods connected (battery, sensor and calibration views).
+
 ## 2026-11-06 – claude (T12, branch claude/english)
 - Hardware result from the maintainer (not yet in captures/): the stream works on Linux (Ubuntu, Intel AX201)
   with AirPods **Pro 2 (USB-C)**, product ID `0x2024`, at roughly 96 Hz with upstream defaults. The maintainer

@@ -12,7 +12,7 @@ This module translates that text at runtime:
 
 ``tests/test_english.py`` checks that every log template in upstream has a translation,
 so an upstream update that adds a message fails the tests instead of showing French.
-The web UI is not covered (task T13).
+The web UI is translated by ``podsmouse/web_english.py``.
 """
 
 import builtins
@@ -48,6 +48,9 @@ LOG_TEMPLATES = {
     "Canal AAP perdu (%s), reconnexion…": "AAP channel lost (%s), reconnecting…",
     "Arrêté": "Stopped",
     "Lancement du contrôleur en arrière-plan…": "Starting the controller in the background…",
+    # upstream/mousepods_web.py
+    "Enregistrement terminé : %s (%d paquets)": "Recording finished: %s (%d packets)",
+    "Action interface échouée %s : %s": "Web UI action failed %s: %s",
 }
 
 # Whole strings shown as notifications, status text, widget labels or log arguments.

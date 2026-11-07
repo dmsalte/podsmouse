@@ -68,6 +68,9 @@ AAPClient → MotionEngine → Controller → Sink
 - Output language: upstream prints French; `podsmouse/english.py` translates terminal output, notifications and the
   calibration window at runtime (default `--lang en`). When upstream adds a log message, `tests/test_english.py`
   fails until the message is added to `english.LOG_TEMPLATES`. Never translate by editing `upstream/`.
+- Web UI language: `podsmouse/web_english.py` builds an English page from `upstream/ui/index.html` at startup
+  (written to `ui-en.html` next to the config file) and swaps the server's label tables. When upstream changes the
+  page or adds server text, `tests/test_web_english.py` fails until `HTML_REPLACEMENTS`/`PHRASES` are updated.
 - Gadget setup: `sudo gadget/setup-hid-gadget.sh` (idempotent; tears down and rebuilds)
 
 ## Working together (multiple agents)
