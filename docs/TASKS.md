@@ -14,7 +14,7 @@ Status values: `todo`, `in progress`, `review`, `done`, `blocked`.
 | T04 | 2 | `Sink` interface, `NullSink` and unit tests | no | codex | done | #2 |
 | T05 | 2 | `HidSink` (4-byte reports, clamp and split) and unit tests against a fake device file | no | codex | done | #3, landed via claude/land-t05 |
 | T06 | 2 | `gadget/hid-mouse.desc` and idempotent `gadget/setup-hid-gadget.sh` (configfs) | no | claude | done | #1 |
-| T07 | 2 | Square-drawing test script; verify on Windows | yes | | todo | |
+| T07 | 2 | Square-drawing test script; verify on Windows | yes | claude | in progress | claude/square-test |
 | T08 | 3 | `podsmouse/main.py` wiring upstream pipeline to a Sink, with `--sink` and `--diag` | no | claude | done | #7 |
 | T09 | 3 | Pro 3 parser in `podsmouse/models/pro3.py`, if T02 shows it differs from Pro 2 | no | | blocked (T02) | |
 | T10 | 4 | systemd units for gadget and service, autostart on boot | no | claude | done | #5 |
