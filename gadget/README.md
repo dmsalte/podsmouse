@@ -63,7 +63,23 @@ With the gadget bound and the PC showing the mouse, this moves the pointer 100 p
 printf '\x00\x64\x00\x00' | sudo tee /dev/hidg0 >/dev/null
 ```
 
+## Square test (phase 2 acceptance check, T07)
+
+Draws a square with smooth moves at 120 Hz and ends where it started. No AirPods needed.
+
+```
+python -m podsmouse.square                          # 3 s countdown, then one square on /dev/hidg0
+python -m podsmouse.square --repeat 3 --click --scroll 3
+python -m podsmouse.square --sink null --delay 0    # dry run on any machine
+```
+
+Run it as a user with write access to `/dev/hidg0` (see `--group` above) or with `sudo`.
+Pass when: Device Manager shows "HID-compliant mouse" under *Mice and other pointing devices*
+with no driver install, and the pointer traces a closed square. With *Enhance pointer precision*
+on, the size depends on speed (try `--seconds 0.5` and `--seconds 2`), but the path should still close.
+`--click` left-clicks at the start point, so put the pointer on an empty part of the desktop.
+
 ## Status
 
-Written and checked in simulation only (syntax, descriptor parsing in `tests/test_hid_descriptor.py`).
-Not yet run on a Pi or seen by Windows. That is task T07.
+Written and checked in simulation only (syntax, descriptor parsing in `tests/test_hid_descriptor.py`,
+square path and HID reports in `tests/test_square.py`). Not yet run on a Pi or seen by Windows. That is task T07.

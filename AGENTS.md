@@ -72,6 +72,7 @@ AAPClient → MotionEngine → Controller → Sink
   (written to `ui-en.html` next to the config file) and swaps the server's label tables. When upstream changes the
   page or adds server text, `tests/test_web_english.py` fails until `HTML_REPLACEMENTS`/`PHRASES` are updated.
 - Gadget setup: `sudo gadget/setup-hid-gadget.sh` (idempotent; tears down and rebuilds)
+- Gadget test (phase 2 check): `python -m podsmouse.square` draws a square on `/dev/hidg0` (`--sink null` for a dry run).
 
 ## Working together (multiple agents)
 
