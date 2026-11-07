@@ -20,7 +20,7 @@ import pathlib
 import sys
 import time
 
-from . import english
+from . import english, web_english
 from .pointer import SinkPointer
 from .sinks import HidSink, Sink
 
@@ -40,6 +40,13 @@ def load_upstream():
     import airpods_mouse_controller  # noqa: PLC0415  (import after sys.path setup)
 
     return airpods_mouse_controller
+
+
+def load_web():
+    """Import the vendored upstream web UI module (call load_upstream first)."""
+    import mousepods_web  # noqa: PLC0415
+
+    return mousepods_web
 
 
 class DryRunSink(Sink):
@@ -112,7 +119,7 @@ def parse_args(argv=None) -> argparse.Namespace:
     ap.add_argument("--calibrate", action="store_true",
                     help="open the calibration window (needs a desktop and python3-tk), save the profile and exit")
     ap.add_argument("--lang", choices=("en", "fr"), default="en",
-                    help="language of upstream messages and the calibration window (default en)")
+                    help="language of upstream messages, the calibration window and the web UI (default en)")
     ap.add_argument("--hid-device", default=DEFAULT_HID_DEVICE, help=f"HID gadget device (default {DEFAULT_HID_DEVICE})")
     ap.add_argument("-c", "--config", default=str(DEFAULT_CONFIG),
                     help=f"writable config and calibration file (default {DEFAULT_CONFIG})")
@@ -143,6 +150,9 @@ def main(argv=None, upstream=None) -> int:
                     "cannot do. Set \"mode\": \"souris\" in %s.", config_path)
 
     web_port = None if args.no_web else args.web_port
+    if args.lang == "en" and web_port is not None and upstream is None:
+        # A fake upstream (tests) has no web module to translate.
+        web_english.install(load_web(), config_path.parent)
 
     if args.diag:
         # Upstream uses its own NullPointer in diag mode; do not open the HID device.

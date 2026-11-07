@@ -66,5 +66,6 @@ then open http://127.0.0.1:8737 on the PC. Calibration also runs from there.
 
 Upstream comments, log messages and UI text are in French. `podsmouse/english.py` translates what the user sees
 (log lines, the `--diag` status line, notifications, the calibration window) at runtime when started through
-`podsmouse.main` (default `--lang en`). The web UI is still French (T13). Running `upstream/airpods_mouse_controller.py`
-directly gives the original French output.
+`podsmouse.main` (default `--lang en`). `podsmouse/web_english.py` does the same for the web UI: it builds an English
+copy of `upstream/ui/index.html` at startup (`ui-en.html` next to the config file) and replaces the label tables and
+status text in `mousepods_web`. Running `upstream/airpods_mouse_controller.py` directly gives the original French output.

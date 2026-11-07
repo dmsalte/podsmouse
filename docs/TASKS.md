@@ -20,4 +20,4 @@ Status values: `todo`, `in progress`, `review`, `done`, `blocked`.
 | T10 | 4 | systemd units for gadget and service, autostart on boot | no | claude | done | #5 |
 | T11 | 4 | Calibration, recenter and click methods tuned on hardware | yes | | todo | |
 | T12 | 4 | English for terminal output and calibration window (runtime translation, no upstream edits); `--sink uinput` and `--calibrate` in `podsmouse.main` | no | claude | done | claude/english |
-| T13 | 4 | English web UI (translated copy or upstream contribution) | no | claude | in progress | claude/web-english |
+| T13 | 4 | English web UI (translated copy or upstream contribution) | no | claude | review | claude/web-english |
