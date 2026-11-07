@@ -3,6 +3,19 @@
 Newest entry first. Every agent appends an entry before it stops working.
 Format: date, agent, what was done, what is left, notes for the next agent.
 
+## 2026-11-07 – claude (T07 script, branch claude/square-test)
+- `podsmouse/square.py` (`python -m podsmouse.square`): draws a square through `HidSink` with even integer steps
+  at 120 Hz (deadline pacing, so sleep overshoot does not add up), ends exactly at the start point. Options:
+  `--side`, `--seconds`, `--rate`, `--repeat`, `--click` (left click after each square), `--scroll N`
+  (N up, then N down), `--delay` (countdown, default 3 s), `--sink null` (dry run, prints net totals).
+- `tests/test_square.py` (12 tests): exact side totals, direction order, pacing with a fake clock, valid int8
+  HID reports written to a temporary file, CLI errors including a missing gadget.
+- `gadget/README.md` has the pass criteria; `AGENTS.md` lists the command.
+- Tested in simulation only (134 tests after rebasing on T13) plus a dry run. Not run on a Pi, not seen by Windows.
+- Left (maintainer, hardware): bind the gadget on the Pi, run `python -m podsmouse.square --click --scroll 3`,
+  check Device Manager shows "HID-compliant mouse" and the pointer closes the square. Note the result here
+  and mark T07 done.
+
 ## 2026-11-07 – claude (T13, branch claude/web-english)
 - `podsmouse/web_english.py`: English web UI at runtime, no upstream edits. The page is built from
   `upstream/ui/index.html` with an exact-match replacement table and written to `ui-en.html` next to the config file
